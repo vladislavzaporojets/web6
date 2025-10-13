@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автосервис - Калькулятор стоимости услуг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: "⚙️";
+            font-size: 3em;
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            opacity: 0.3;
+        }
+
+        .header::after {
+            content: "🔧";
+            font-size: 3em;
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .calculator {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .radio-option input, .checkbox-option input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .price-display {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .price-display h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .total-price {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .currency {
+            font-size: 0.6em;
+            opacity: 0.8;
+        }
+
+        .service-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .calculator {
+                padding: 20px;
+            }
+            
+            .form-group {
+                padding: 15px;
+            }
+        }
+
+        /* Анимации */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .price-update {
+            animation: pulse 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ АВТОСЕРВИС PRO</h1>
+            <p>Калькулятор стоимости услуг</p>
+        </div>
+
+        <div class="calculator">
+            <form id="calculatorForm">
+                <div class="form-group">
+                    <label for="quantity">
+                        <span class="service-icon">🔢</span>
+                        Количество автомобилей:
+                    </label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1" placeholder="Введите количество">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="service-icon">🚗</span>
+                        Тип услуги:
+                    </label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="serviceType" value="diagnostic" checked>
+                            <strong>Диагностика</strong> - компьютерная диагностика систем автомобиля
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="serviceType" value="maintenance">
+                            <strong>Техобслуживание</strong> - замена масла, фильтров, жидкостей
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="serviceType" value="repair">
+                            <strong>Ремонт</strong> - устранение неисправностей и замена деталей
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group hidden" id="optionsGroup">
+                    <label for="serviceOption">
+                        <span class="service-icon">⚡</span>
+                        Дополнительные опции:
+                    </label>
+                    <select id="serviceOption" name="serviceOption">
+                        <option value="basic">Базовая диагностика</option>
+                        <option value="advanced">Расширенная диагностика</option>
+                        <option value="full">Полная диагностика всех систем</option>
+                    </select>
+                </div>
+                
+                <div class="form-group hidden" id="propertyGroup">
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="urgent" name="urgent">
+                        <strong>Срочный ремонт</strong> (приоритетное обслуживание +30%)
+                    </label>
+                </div>
+            </form>
+
+            <div class="price-display">
+                <h3>Общая стоимость услуг:</h3>
+                <div class="total-price">
+                    <span id="totalPrice">0</span>
+                    <span class="currency">рублей</span>
+                </div>
+                <p style="margin-top: 10px; opacity: 0.8;">*Цена указана с учетом НДС</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Автосервис PRO. Все права защищены.</p>
+            <p>📞 +7 (800) 123-45-67 | 🕒 Ежедневно 8:00-22:00</p>
+        </div>
+    </div>
+
+    <script>
+        // Цены для автосервиса
+        const prices = {
+            diagnostic: 1500,    // Диагностика
+            maintenance: 3000,   // Техобслуживание
+            repair: 5000,        // Ремонт
+            options: {
+                basic: 0,
+                advanced: 1000,
+                full: 2000
+            },
+            urgent: 0.3 // 30% надбавка за срочность
+        };
+
+        // Элементы DOM
+        const quantityInput = document.getElementById('quantity');
+        const serviceTypeRadios = document.querySelectorAll('input[name="serviceType"]');
+        const optionsGroup = document.getElementById('optionsGroup');
+        const serviceOptionSelect = document.getElementById('serviceOption');
+        const propertyGroup = document.getElementById('propertyGroup');
+        const urgentCheckbox = document.getElementById('urgent');
+        const totalPriceElement = document.getElementById('totalPrice');
+        const priceDisplay = document.querySelector('.price-display');
+
+        // Функция для пересчета стоимости
+        function calculatePrice() {
+            const quantity = parseInt(quantityInput.value) || 1;
+            
+            // Находим выбранный тип услуги
+            let selectedServiceType = 'diagnostic';
+            serviceTypeRadios.forEach(radio => {
+                if (radio.checked) {
+                    selectedServiceType = radio.value;
+                }
+            });
+            
+            let basePrice = prices[selectedServiceType];
+            let optionPrice = 0;
+            let urgentMultiplier = 1;
+            
+            // Добавляем стоимость опции для диагностики
+            if (selectedServiceType === 'diagnostic') {
+                const selectedOption = serviceOptionSelect.value;
+                optionPrice = prices.options[selectedOption];
+            }
+            
+            // Добавляем надбавку за срочность для ремонта
+            if (selectedServiceType === 'repair' && urgentCheckbox.checked) {
+                urgentMultiplier = 1 + prices.urgent;
+            }
+            
+            // Итоговая стоимость
+            const totalPrice = Math.round((basePrice + optionPrice) * urgentMultiplier * quantity);
+            totalPriceElement.textContent = totalPrice.toLocaleString('ru-RU');
+            
+            // Анимация обновления цены
+            priceDisplay.classList.remove('price-update');
+            void priceDisplay.offsetWidth; // Trigger reflow
+            priceDisplay.classList.add('price-update');
+        }
+
+        // Функция для обновления видимости элементов формы
+        function updateFormVisibility() {
+            let selectedServiceType = 'diagnostic';
+            serviceTypeRadios.forEach(radio => {
+                if (radio.checked) {
+                    selectedServiceType = radio.value;
+                }
+            });
+            
+            // Скрываем/показываем элементы в зависимости от типа услуги
+            switch(selectedServiceType) {
+                case 'diagnostic':
+                    optionsGroup.classList.remove('hidden');
+                    propertyGroup.classList.add('hidden');
+                    break;
+                case 'maintenance':
+                    optionsGroup.classList.add('hidden');
+                    propertyGroup.classList.add('hidden');
+                    break;
+                case 'repair':
+                    optionsGroup.classList.add('hidden');
+                    propertyGroup.classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // Назначаем обработчики событий
+        quantityInput.addEventListener('input', calculatePrice);
+        
+        serviceTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                updateFormVisibility();
+                calculatePrice();
+            });
+        });
+        
+        serviceOptionSelect.addEventListener('change', calculatePrice);
+        urgentCheckbox.addEventListener('change', calculatePrice);
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFormVisibility();
+            calculatePrice();
+            
+            // Добавляем обработчик для Enter в поле количества
+            quantityInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    calculatePrice();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
